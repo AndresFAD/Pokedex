@@ -1,0 +1,121 @@
+---
+import { CapitalizeWord } from "../../lib/utils";
+import {
+  getChain,
+  getPokemonbyName,
+  getSpecie,
+} from "../../services/PokemonSerice";
+import type { Pokemon } from "../../types/Pokemon";
+
+interface Props {
+  pokemon: Pokemon;
+}
+
+const { pokemon } = Astro.props;
+
+let evolutionChain: Pokemon[] = [];
+const specie = await getSpecie(pokemon.species.url);
+const chain = await getChain(specie.evolution_chain.url);
+let actualChain = chain.chain;
+
+let actualPokemon: Pokemon | null = null;
+
+while (actualChain) {
+  actualPokemon = await getPokemonbyName(actualChain.species.name);
+  evolutionChain.push(actualPokemon);
+
+  actualChain = actualChain.evolves_to[0];
+}
+---
+
+<div class="text-center m-4 p-10">
+  <h2 class="font-semibold text-2xl">Evolution Chain</h2>
+  <div class="flex justify-center m-4 ">
+    {
+      evolutionChain.map((pokemonChain) => (
+        <a href=`/pokemon/${pokemonChain.name}`>
+          {
+            <img
+              class="w-64 border-4 rounded-full mx-5 border-indigo-500 transition-transform hover:scale-110 shadow-lg"
+              class:list={[
+                "w-64 border-4 rounded-full mx-5",
+                {
+                  "border-indigo-500": pokemonChain.name !== pokemon.name,
+                  "border-rose-600": pokemonChain.name === pokemon.name,
+                },
+              ]}
+              src={pokemonChain.sprites.front_default}
+            />
+
+            <div class="flex justify-center my-4 ">
+            {pokemonChain.types.map(type => (
+               <div
+              class:list={[
+                "py-1 px-5 rounded mx-3 shadow-lg",
+                {
+                  "bg-[#A8A878]": type.type.name === "normal",
+                },
+                {
+                  "bg-[#F08030]": type.type.name === "fire",
+                },
+                {
+                  "bg-[#6890F0]": type.type.name === "water",
+                },
+                {
+                  "bg-[#F8D030]": type.type.name === "electric",
+                },
+                {
+                  "bg-[#78C850]": type.type.name === "grass",
+                },
+                {
+                  "bg-[#98D8D8]": type.type.name === "ice",
+                },
+                {
+                  "bg-[#C03028]": type.type.name === "fighting",
+                },
+                {
+                  "bg-[#A040A0] text-white": type.type.name === "poison",
+                },
+                {
+                  "bg-[#E0C068]": type.type.name === "ground",
+                },
+                {
+                  "bg-[#A890F0]": type.type.name === "flying",
+                },
+                {
+                  "bg-[#F85888]": type.type.name === "psychic",
+                },
+                {
+                  "bg-[#A8B820]": type.type.name === "bug",
+                },
+                {
+                  "bg-[#B8A038]": type.type.name === "rock",
+                },
+                {
+                  "bg-[#705898] text-white": type.type.name === "ghost",
+                },
+                {
+                  "bg-[#7038F8] text-white": type.type.name === "dragon",
+                },
+                {
+                  "bg-[#705848]": type.type.name === "dark",
+                },
+                {
+                  "bg-[#B8B8D0]": type.type.name === "steel",
+                },
+                {
+                  "bg-[#EE99AC]": type.type.name === "fairy",
+                },
+              ]}
+            >
+              {CapitalizeWord(type.type.name)}
+            </div>
+            ))}</div>
+
+            <span class="font-medium text-lg">{CapitalizeWord(pokemonChain.name)} N.º{pokemonChain.id}</span>
+          }
+        </a>
+      ))
+    }
+  </div>
+</div>

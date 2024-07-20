@@ -1,0 +1,43 @@
+---
+import { isConstructorDeclaration } from "typescript";
+import { getPokemonbyName } from "../../services/PokemonSerice";
+import { CapitalizeWord } from "../../lib/utils";
+
+interface Props {
+  name: string;
+}
+
+const { name } = Astro.props;
+
+const pokemon = await getPokemonbyName(name);
+---
+
+<a
+  class:list={[
+    "w-40 bg-white rounded-2xl text-center shadow-lg  m-4 p-4 transition hover:scale-110 cursor-pointer",
+    { "hover:shadow-[#A8A878]": pokemon.types[0].type.name === "normal" },
+    { "hover:shadow-[#F08030]": pokemon.types[0].type.name === "fire" },
+    { "hover:shadow-[#6890F0]": pokemon.types[0].type.name === "water" },
+    { "hover:shadow-[#F8D030]": pokemon.types[0].type.name === "electric" },
+    { "hover:shadow-[#78C850]": pokemon.types[0].type.name === "grass" },
+    { "hover:shadow-[#98D8D8]": pokemon.types[0].type.name === "ice" },
+    { "hover:shadow-[#C03028]": pokemon.types[0].type.name === "fighting" },
+    { "hover:shadow-[#A040A0]": pokemon.types[0].type.name === "poison" },
+    { "hover:shadow-[#E0C068]": pokemon.types[0].type.name === "ground" },
+    { "hover:shadow-[#A890F0]": pokemon.types[0].type.name === "flying" },
+    { "hover:shadow-[#F85888]": pokemon.types[0].type.name === "psychic" },
+    { "hover:shadow-[#A8B820]": pokemon.types[0].type.name === "bug" },
+    { "hover:shadow-[#B8A038]": pokemon.types[0].type.name === "rock" },
+    { "hover:shadow-[#705898]": pokemon.types[0].type.name === "ghost" },
+    { "hover:shadow-[#7038F8]": pokemon.types[0].type.name === "dragon" },
+    { "hover:shadow-[#705848]": pokemon.types[0].type.name === "dark" },
+    { "hover:shadow-[#B8B8D0]": pokemon.types[0].type.name === "steel" },
+    { "hover:shadow-[#EE99AC]": pokemon.types[0].type.name === "fairy" },
+  ]}
+  href=`/pokemon/${name}`
+>
+  <div class="flex justify-center">
+    <img class="w-32" src={pokemon.sprites.front_default} />
+  </div>
+  <h2>{pokemon.id} - {CapitalizeWord(pokemon.name)}</h2>
+</a>

@@ -1,0 +1,104 @@
+---
+import { CapitalizeWord } from "../../lib/utils";
+import { getMovebyName } from "../../services/PokemonSerice";
+
+interface Props {
+  name: string;
+}
+
+const { name } = Astro.props;
+
+const move = await getMovebyName(name);
+---
+
+<tr class="hover:bg-gray-100">
+  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">
+    <a href=`/moves/${name}`>{CapitalizeWord(move.name)}</a>
+  </td>
+  {
+    (
+      <>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
+          <span
+            class:list={[
+              "py-1 px-5 rounded mx-3 shadow-lg",
+              {
+                "bg-[#A8A878]": move.type.name === "normal",
+              },
+              {
+                "bg-[#F08030]": move.type.name === "fire",
+              },
+              {
+                "bg-[#6890F0]": move.type.name === "water",
+              },
+              {
+                "bg-[#F8D030]": move.type.name === "electric",
+              },
+              {
+                "bg-[#78C850]": move.type.name === "grass",
+              },
+              {
+                "bg-[#98D8D8]": move.type.name === "ice",
+              },
+              {
+                "bg-[#C03028] text-white": move.type.name === "fighting",
+              },
+              {
+                "bg-[#A040A0] text-white    ": move.type.name === "poison",
+              },
+              {
+                "bg-[#E0C068]": move.type.name === "ground",
+              },
+              {
+                "bg-[#A890F0]": move.type.name === "flying",
+              },
+              {
+                "bg-[#F85888]": move.type.name === "psychic",
+              },
+              {
+                "bg-[#A8B820]": move.type.name === "bug",
+              },
+              {
+                "bg-[#B8A038]": move.type.name === "rock",
+              },
+              {
+                "bg-[#705898]": move.type.name === "ghost",
+              },
+              {
+                "bg-[#7038F8] text-white": move.type.name === "dragon",
+              },
+              {
+                "bg-[#705848]": move.type.name === "dark",
+              },
+              {
+                "bg-[#B8B8D0]": move.type.name === "steel",
+              },
+              {
+                "bg-[#EE99AC]": move.type.name === "fairy",
+              },
+            ]}
+          >
+            {CapitalizeWord(move.type.name)}
+          </span>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
+          {move.power}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
+          {move.accuracy}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-end text-sm font-medium">
+          <img
+            src={
+              move.damage_class.name === "physical"
+                ? "https://images.wikidexcdn.net/mwuploads/wikidex/3/31/latest/20140504181227/Clase_f%C3%ADsico.gif"
+                : move.damage_class.name === "special"
+                  ? "https://images.wikidexcdn.net/mwuploads/wikidex/6/61/latest/20140504180925/Clase_especial.gif"
+                  : "https://images.wikidexcdn.net/mwuploads/wikidex/0/06/latest/20141020094029/Clase_estado.gif"
+            }
+          />
+        </td>
+      </>
+    )
+  }
+</tr>

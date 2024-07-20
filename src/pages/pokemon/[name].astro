@@ -1,0 +1,203 @@
+---
+import type { ActionError } from "astro:actions";
+import Layout from "../../layouts/Layout.astro";
+import { CapitalizeWord } from "../../lib/utils";
+import { getPokemonbyName, getSpecie, getPokemonbyId } from "../../services/PokemonSerice";
+import ChainEvolution from "../../components/pokemon/ChainEvolution.astro";
+import ListPokedex from "../../components/pokedex/ListPokedex.astro";
+import MovementList from "../../components/pokemon/MovementList.astro";
+
+const { name } = Astro.params;
+
+let pokemon;
+if (name) {
+  pokemon = await getPokemonbyName(name);
+} else {
+}
+
+let specie = await getSpecie(pokemon.species.url);
+let numberdex = pokemon?.id.toString();
+const beforePokemon = await getPokemonbyId(pokemon?.id - 1);
+const nextPokemon = await getPokemonbyId(pokemon?.id + 1);
+let abilities = pokemon?.abilities.filter((ability) => !ability.is_hidden);
+let hidden = pokemon?.abilities.filter((ability) => ability.is_hidden);
+
+for (let i = numberdex.length; i < 4; i++) numberdex = "0" + numberdex;
+---
+
+<Layout title="Pokemon">
+  <div class="my-4">
+    <a class="py-2 px-3 bg-gray-400 font-semibold rounded-lg" href="/pokedex"
+      >Back</a
+    >
+  </div>
+  <div class="my-4 flex justify-center gap-3">
+    {beforePokemon && (<a
+      class="py-2 px-3 bg-gray-400 font-semibold rounded-lg"
+      href=`/pokemon/${beforePokemon.name}`>Before</a
+    >)}
+    <a
+      class="py-2 px-3 bg-gray-400 font-semibold rounded-lg"
+      href=`/pokemon/${nextPokemon.name}`>Next</a
+    >
+  </div>
+  <div class="text-center m-6">
+    <h1 class="text-4xl font-semibold">
+      {CapitalizeWord(pokemon.name)} N.º{numberdex}
+    </h1>
+  </div>
+  <div class="grid grid-cols-2 gap-6 m-4">
+    <div class="text-center">
+      <h2 class="font-semibold text-2xl m-2">Sprites</h2>
+      <div class="flex justify-center bg-gray-200 rounded-lg">
+        <img class="w-56" src={pokemon?.sprites.front_default} />
+        <img class="w-56" src={pokemon?.sprites.back_default} />
+      </div>
+      <div class="text-center m-4 p-2">
+        <h2 class="font-semibold text-2xl m-2">Stats</h2>
+        {
+          pokemon?.stats.map((stat) => (
+            <div class="my-2">
+              <div class="flex justify-between mb-1">
+                <span class="text-base font-medium ">
+                  {CapitalizeWord(stat.stat.name)}
+                </span>
+                <span class="text-sm font-medium ">{stat.base_stat}</span>
+              </div>
+              <div class="w-full bg-gray-300 rounded-full h-4 ">
+                <div
+                  class:list={[
+                    { "bg-blue-600": stat.stat.name.includes("defense") },
+                    { "bg-red-600": stat.stat.name.includes("attack") },
+                    {
+                      "bg-green-600":
+                        stat.stat.name === "hp" || stat.stat.name === "speed",
+                    },
+                  ]}
+                  class="bg-blue-600 h-4 rounded-full"
+                  style={"width: " + (stat.base_stat / 255) * 100 + "%"}
+                />
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+    <div class="text-center">
+      <span class="font-semibold text-2xl m-2">Pokemon Description</span>
+      <div class="bg-green-400 rounded-lg p-5 grid grid-cols-2 gap-6 m-4">
+        <div class="col-span-2">
+          <p class="text-lg font-medium">
+            {
+              specie.flavor_text_entries
+                .filter((text) => text.language.name === "en")[0]
+                .flavor_text.replace("", " ")
+            }
+          </p>
+        </div>
+        <div class="flex flex-col pb-3">
+          <dt class="mb-1 md:text-lg font-semibold">Height</dt>
+          <dd class="text-lg">{pokemon?.height}</dd>
+        </div>
+        <div class="flex flex-col pb-3">
+          <dt class="mb-1 md:text-lg font-semibold">Ability</dt>
+          <dd class="text-lg">
+            {
+              abilities?.map((abiliti) => (
+                <span>{CapitalizeWord(abiliti.ability.name)}</span>
+              ))
+            }
+          </dd>
+        </div>
+        <div class="flex flex-col pb-3">
+          <dt class="mb-1 md:text-lg font-semibold">Weight</dt>
+          <dd class="text-lg">{pokemon?.weight}</dd>
+        </div>
+        <div class="flex flex-col pb-3">
+          <dt class="mb-1 md:text-lg font-semibold">Hidden Ability</dt>
+          <dd class="text-lg">
+            {
+              hidden?.length > 0
+                ? CapitalizeWord(hidden[0].ability.name)
+                : "This pokemon does'nt have hidden ability"
+            }
+          </dd>
+        </div>
+      </div>
+      <span class="font-semibold text-2xl m-2">Types</span>
+      <div class="flex justify-center m-4">
+        {
+          pokemon?.types.map((type) => (
+            <div
+              class:list={[
+                "py-1 px-5 rounded mx-3",
+                {
+                  "bg-[#A8A878]": type.type.name === "normal",
+                },
+                {
+                  "bg-[#F08030]": type.type.name === "fire",
+                },
+                {
+                  "bg-[#6890F0]": type.type.name === "water",
+                },
+                {
+                  "bg-[#F8D030]": type.type.name === "electric",
+                },
+                {
+                  "bg-[#78C850]": type.type.name === "grass",
+                },
+                {
+                  "bg-[#98D8D8]": type.type.name === "ice",
+                },
+                {
+                  "bg-[#C03028]": type.type.name === "fighting",
+                },
+                {
+                  "bg-[#A040A0] text-white": type.type.name === "poison",
+                },
+                {
+                  "bg-[#E0C068]": type.type.name === "ground",
+                },
+                {
+                  "bg-[#A890F0]": type.type.name === "flying",
+                },
+                {
+                  "bg-[#F85888]": type.type.name === "psychic",
+                },
+                {
+                  "bg-[#A8B820]": type.type.name === "bug",
+                },
+                {
+                  "bg-[#B8A038]": type.type.name === "rock",
+                },
+                {
+                  "bg-[#705898] text-white": type.type.name === "ghost",
+                },
+                {
+                  "bg-[#7038F8] text-white": type.type.name === "dragon",
+                },
+                {
+                  "bg-[#705848]": type.type.name === "dark",
+                },
+                {
+                  "bg-[#B8B8D0]": type.type.name === "steel",
+                },
+                {
+                  "bg-[#EE99AC]": type.type.name === "fairy",
+                },
+              ]}
+            >
+              {CapitalizeWord(type.type.name)}
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+  <div>
+    <ChainEvolution pokemon={pokemon} />
+  </div>
+  <div>
+    <MovementList pokemon={pokemon} />
+  </div>
+</Layout>
