@@ -1,0 +1,9 @@
+---
+import { ListAbilities } from "../components/ability/ListAbilities";
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Movement List">
+  <div class="flex justify-center font-semibold text-2xl">Abilities List</div>
+  <ListAbilities client:load />
+</Layout>

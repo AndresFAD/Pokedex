@@ -1,8 +1,8 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import ListPokedex from "../components/pokedex/ListPokedex.astro";
+import { ListPokedex } from "../components/pokedex/ListPokedex";
 ---
 
 <Layout title="Pokedex">
-  <ListPokedex />
+  <ListPokedex client:load />
 </Layout>

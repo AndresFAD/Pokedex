@@ -1,10 +1,9 @@
 ---
-import { ListMoves } from "../components/move/ListMoves";
 import Layout from "../layouts/Layout.astro";
-
+import {ListItems} from "../components/items/ListItems"
 ---
 
 <Layout title="Movement List">
   <div class="flex justify-center font-semibold text-2xl">Movement List</div>
-  <ListMoves client:load />
+  <ListItems client:load />
 </Layout>

@@ -1,11 +1,10 @@
 ---
-import type { ActionError } from "astro:actions";
+
 import Layout from "../../layouts/Layout.astro";
 import { CapitalizeWord } from "../../lib/utils";
 import { getPokemonbyName, getSpecie, getPokemonbyId } from "../../services/PokemonSerice";
 import ChainEvolution from "../../components/pokemon/ChainEvolution.astro";
-import ListPokedex from "../../components/pokedex/ListPokedex.astro";
-import MovementList from "../../components/pokemon/MovementList.astro";
+import {MovementList} from "../../components/pokemon/MovementList"
 
 const { name } = Astro.params;
 
@@ -17,7 +16,7 @@ if (name) {
 
 let specie = await getSpecie(pokemon.species.url);
 let numberdex = pokemon?.id.toString();
-const beforePokemon = await getPokemonbyId(pokemon?.id - 1);
+const beforePokemon = pokemon?.id - 1 > 1 ? await getPokemonbyId(pokemon?.id - 1): null;
 const nextPokemon = await getPokemonbyId(pokemon?.id + 1);
 let abilities = pokemon?.abilities.filter((ability) => !ability.is_hidden);
 let hidden = pokemon?.abilities.filter((ability) => ability.is_hidden);
@@ -104,7 +103,7 @@ for (let i = numberdex.length; i < 4; i++) numberdex = "0" + numberdex;
           <dd class="text-lg">
             {
               abilities?.map((abiliti) => (
-                <span>{CapitalizeWord(abiliti.ability.name)}</span>
+                <span>{CapitalizeWord(abiliti.ability.name)}</span><br>
               ))
             }
           </dd>
@@ -150,7 +149,7 @@ for (let i = numberdex.length; i < 4; i++) numberdex = "0" + numberdex;
                   "bg-[#98D8D8]": type.type.name === "ice",
                 },
                 {
-                  "bg-[#C03028]": type.type.name === "fighting",
+                  "bg-[#C03028] text-white": type.type.name === "fighting",
                 },
                 {
                   "bg-[#A040A0] text-white": type.type.name === "poison",
@@ -198,6 +197,6 @@ for (let i = numberdex.length; i < 4; i++) numberdex = "0" + numberdex;
     <ChainEvolution pokemon={pokemon} />
   </div>
   <div>
-    <MovementList pokemon={pokemon} />
+    <MovementList pokemon={pokemon} client:load/>
   </div>
 </Layout>

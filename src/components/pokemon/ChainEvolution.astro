@@ -21,8 +21,11 @@ let actualChain = chain.chain;
 let actualPokemon: Pokemon | null = null;
 
 while (actualChain) {
+  actualChain.evolves_to.length > 1 ? actualChain.evolves_to.map(async (obj) => evolutionChain.push(await getPokemonbyName(obj.species.name))): true;
   actualPokemon = await getPokemonbyName(actualChain.species.name);
-  evolutionChain.push(actualPokemon);
+  console.log(actualChain.evolves_to)
+  console.log(evolutionChain.includes(actualPokemon))
+  evolutionChain.includes(actualPokemon) === false ? evolutionChain.push(actualPokemon): true;
 
   actualChain = actualChain.evolves_to[0];
 }
@@ -44,7 +47,7 @@ while (actualChain) {
                   "border-rose-600": pokemonChain.name === pokemon.name,
                 },
               ]}
-              src={pokemonChain.sprites.front_default}
+              src={pokemonChain.sprites.other?.["official-artwork"].front_default}
             />
 
             <div class="flex justify-center my-4 ">
@@ -71,7 +74,7 @@ while (actualChain) {
                   "bg-[#98D8D8]": type.type.name === "ice",
                 },
                 {
-                  "bg-[#C03028]": type.type.name === "fighting",
+                  "bg-[#C03028] text-white": type.type.name === "fighting",
                 },
                 {
                   "bg-[#A040A0] text-white": type.type.name === "poison",

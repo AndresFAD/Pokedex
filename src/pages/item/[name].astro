@@ -1,0 +1,47 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { CapitalizeWord } from "../../lib/utils";
+import { getItembyName } from "../../services/PokemonSerice";
+
+const { name } = Astro.params;
+
+const item = await getItembyName(name);
+---
+
+<Layout title={name}>
+  <div class="flex justify-center m-5">
+    <h2 class="font-semibold text-3xl">{CapitalizeWord(name)}</h2>
+  </div>
+  <div class="flex justify-center m-5">
+    <img class="w-40" src={item.sprites.default}/>
+  </div>
+  <div class="bg-zinc-200 m-5 p-6 rounded-lg shadow-lg grid col-span-3">
+    <div class="flex flex-col pb-3 text-center col-span-3">
+      <dt class="mb-1 md:text-lg font-semibold">Descripction</dt>
+      <dd class="text-lg">
+        {
+          item.effect_entries.filter((ab) => ab.language.name === "en")[0]
+            .effect
+        }
+      </dd>
+    </div>
+    <div class="flex flex-col pb-3 text-center">
+      <dt class="mb-1 md:text-lg font-semibold">Cost</dt>
+      <dd class="text-lg">
+        {item.cost}
+      </dd>
+    </div>
+    <div class="flex flex-col pb-3 text-center">
+      <dt class="mb-1 md:text-lg font-semibold">Category</dt>
+      <dd class="text-lg">
+        {CapitalizeWord(item.category.name)}
+      </dd>
+    </div>
+    <div class="flex flex-col pb-3 text-center">
+      <dt class="mb-1 md:text-lg font-semibold">Atributtes</dt>
+      <dd class="text-lg">
+        {item.attributes.map((att) => <p>{CapitalizeWord(att.name)}</p>)}
+      </dd>
+    </div>
+  </div>
+</Layout>

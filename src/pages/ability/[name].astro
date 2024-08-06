@@ -1,0 +1,45 @@
+---
+import {CardPokemon} from "../../components/pokedex/CardPokemon";
+import Layout from "../../layouts/Layout.astro";
+import { CapitalizeWord } from "../../lib/utils";
+import { getAbilitybyName } from "../../services/PokemonSerice";
+
+const { name } = Astro.params;
+
+console.log(name);
+
+const ability = await getAbilitybyName(name);
+
+console.log(ability.pokemon);
+---
+
+<Layout title={name}>
+  <div>
+    <div class="flex justify-center m-5">
+      <h2 class="font-semibold text-3xl">{CapitalizeWord(name)}</h2>
+    </div>
+    <div class="bg-zinc-200 m-5 p-6 rounded-lg shadow-lg">
+      <div class="flex flex-col pb-3 text-center">
+        <dt class="mb-1 md:text-lg font-semibold">Descripction</dt>
+        <dd class="text-lg">
+          {
+            ability.effect_entries.filter((ab) => ab.language.name === "en")[0]
+              .effect
+          }
+        </dd>
+      </div>
+    </div>
+    <div class="flex justify-center">
+      <h2 class="font-semibold text-3xl">Pokemon that has this ability</h2>
+    </div>
+    <div class="grid grid-cols-4 bg-zinc-200 m-5 p-6 rounded-lg shadow-lg">
+      {
+        ability.pokemon.map((pokemon) => (
+          <>
+            <CardPokemon name={pokemon?.pokemon.name} client:load />
+          </>
+        ))
+      }
+    </div>
+  </div>
+</Layout>
