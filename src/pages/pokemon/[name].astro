@@ -1,205 +1,203 @@
 ---
-
 import Layout from "../../layouts/Layout.astro";
 import { CapitalizeWord } from "../../lib/utils";
 import { getPokemonbyName, getSpecie, getPokemonbyId, getMove } from "../../services/PokemonSerice";
+import { getTypeColor } from "../../lib/pokemonTypeColors";
 import ChainEvolution from "../../components/pokemon/ChainEvolution.astro";
-import {MovementList} from "../../components/pokemon/MovementList"
+import TypeBadge from "../../components/shared/TypeBadge.astro";
+import { MovementList } from "../../components/pokemon/MovementList";
 
 const { name } = Astro.params;
+if (!name) return Astro.redirect("/pokedex");
 
-let pokemon;
-if (name) {
-  pokemon = await getPokemonbyName(name);
-} else {
-}
+const pokemon = await getPokemonbyName(name);
 
 const [specie, beforePokemon, nextPokemon, moves] = await Promise.all([
   getSpecie(pokemon.species.url),
-  pokemon?.id - 1 > 1 ? getPokemonbyId(pokemon?.id - 1) : Promise.resolve(null),
-  getPokemonbyId(pokemon?.id + 1),
+  pokemon.id > 1 ? getPokemonbyId(pokemon.id - 1) : Promise.resolve(null),
+  getPokemonbyId(pokemon.id + 1),
   Promise.all(pokemon.moves.map((move) => getMove(move.move.url))),
 ]);
-let numberdex = pokemon?.id.toString();
-let abilities = pokemon?.abilities.filter((ability) => !ability.is_hidden);
-let hidden = pokemon?.abilities.filter((ability) => ability.is_hidden);
 
+let numberdex = pokemon.id.toString();
 for (let i = numberdex.length; i < 4; i++) numberdex = "0" + numberdex;
+
+const abilities = pokemon.abilities.filter((ability) => !ability.is_hidden);
+const hidden = pokemon.abilities.filter((ability) => ability.is_hidden);
+
+const description = specie.flavor_text_entries
+  .filter((text) => text.language.name === "en")[0]
+  ?.flavor_text.replace(/[\n\f]/g, " ");
+
+const heightMeters = (pokemon.height / 10).toFixed(1);
+const weightKg = (pokemon.weight / 10).toFixed(1);
+
+const STAT_META: Record<string, { label: string; color: string }> = {
+  hp: { label: "HP", color: "#22c55e" },
+  attack: { label: "Attack", color: "#ef4444" },
+  defense: { label: "Defense", color: "#3b82f6" },
+  "special-attack": { label: "Sp. Atk", color: "#a855f7" },
+  "special-defense": { label: "Sp. Def", color: "#14b8a6" },
+  speed: { label: "Speed", color: "#ec4899" },
+};
+
+const typeColorA = getTypeColor(pokemon.types[0]?.type.name);
+const typeColorB = getTypeColor(pokemon.types[1]?.type.name ?? pokemon.types[0]?.type.name);
+
+const artwork = pokemon.sprites.other?.["official-artwork"];
+const cryUrl = pokemon.cries?.latest;
 ---
 
-<Layout title="Pokemon">
-  <div class="my-4">
-    <a class="py-2 px-3 bg-gray-400 font-semibold rounded-lg" href="/pokedex"
-      >Back</a
-    >
-  </div>
-  <div class="my-4 flex justify-center gap-3">
-    {beforePokemon && (<a
-      class="py-2 px-3 bg-gray-400 font-semibold rounded-lg"
-      href=`/pokemon/${beforePokemon.name}`>Before</a
-    >)}
+<Layout title={CapitalizeWord(pokemon.name)}>
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
     <a
-      class="py-2 px-3 bg-gray-400 font-semibold rounded-lg"
-      href=`/pokemon/${nextPokemon.name}`>Next</a
+      href="/pokedex"
+      class="py-2.5 px-5 rounded-full bg-white border border-gray-200 shadow-sm font-medium text-gray-700 hover:border-red-300 hover:text-red-600 hover:shadow-md transition"
     >
-  </div>
-  <div class="text-center m-6">
-    <h1 class="text-4xl font-semibold">
-      {CapitalizeWord(pokemon.name)} N.º{numberdex}
-    </h1>
-  </div>
-  <div class="grid grid-cols-2 gap-6 m-4">
-    <div class="text-center">
-      <h2 class="font-semibold text-2xl m-2">Sprites</h2>
-      <div class="flex justify-center bg-gray-200 rounded-lg">
-        <img class="w-56" src={pokemon?.sprites.front_default} />
-        <img class="w-56" src={pokemon?.sprites.back_default} />
-      </div>
-      <div class="text-center m-4 p-2">
-        <h2 class="font-semibold text-2xl m-2">Stats</h2>
-        {
-          pokemon?.stats.map((stat) => (
-            <div class="my-2">
-              <div class="flex justify-between mb-1">
-                <span class="text-base font-medium ">
-                  {CapitalizeWord(stat.stat.name)}
-                </span>
-                <span class="text-sm font-medium ">{stat.base_stat}</span>
-              </div>
-              <div class="w-full bg-gray-300 rounded-full h-4 ">
-                <div
-                  class:list={[
-                    { "bg-blue-600": stat.stat.name.includes("defense") },
-                    { "bg-red-600": stat.stat.name.includes("attack") },
-                    {
-                      "bg-green-600":
-                        stat.stat.name === "hp" || stat.stat.name === "speed",
-                    },
-                  ]}
-                  class="bg-blue-600 h-4 rounded-full"
-                  style={"width: " + (stat.base_stat / 255) * 100 + "%"}
-                />
-              </div>
-            </div>
-          ))
-        }
-      </div>
+      ← Volver
+    </a>
+    <div class="flex gap-3">
+      {beforePokemon && (
+        <a
+          href={`/pokemon/${beforePokemon.name}`}
+          class="py-2.5 px-5 rounded-full bg-white border border-gray-200 shadow-sm font-medium text-gray-700 hover:border-red-300 hover:text-red-600 hover:shadow-md transition"
+        >
+          ← {CapitalizeWord(beforePokemon.name)}
+        </a>
+      )}
+      <a
+        href={`/pokemon/${nextPokemon.name}`}
+        class="py-2.5 px-5 rounded-full bg-white border border-gray-200 shadow-sm font-medium text-gray-700 hover:border-red-300 hover:text-red-600 hover:shadow-md transition"
+      >
+        {CapitalizeWord(nextPokemon.name)} →
+      </a>
     </div>
-    <div class="text-center">
-      <span class="font-semibold text-2xl m-2">Pokemon Description</span>
-      <div class="bg-green-400 rounded-lg p-5 grid grid-cols-2 gap-6 m-4">
-        <div class="col-span-2">
-          <p class="text-lg font-medium">
-            {
-              specie.flavor_text_entries
-                .filter((text) => text.language.name === "en")[0]
-                .flavor_text.replace("", " ")
-            }
-          </p>
-        </div>
-        <div class="flex flex-col pb-3">
-          <dt class="mb-1 md:text-lg font-semibold">Height</dt>
-          <dd class="text-lg">{pokemon?.height}</dd>
-        </div>
-        <div class="flex flex-col pb-3">
-          <dt class="mb-1 md:text-lg font-semibold">Ability</dt>
-          <dd class="text-lg">
-            {
-              abilities?.map((abiliti) => (
-                <span>{CapitalizeWord(abiliti.ability.name)}</span><br>
-              ))
-            }
-          </dd>
-        </div>
-        <div class="flex flex-col pb-3">
-          <dt class="mb-1 md:text-lg font-semibold">Weight</dt>
-          <dd class="text-lg">{pokemon?.weight}</dd>
-        </div>
-        <div class="flex flex-col pb-3">
-          <dt class="mb-1 md:text-lg font-semibold">Hidden Ability</dt>
-          <dd class="text-lg">
-            {
-              hidden?.length > 0
-                ? CapitalizeWord(hidden[0].ability.name)
-                : "This pokemon does'nt have hidden ability"
-            }
-          </dd>
-        </div>
-      </div>
-      <span class="font-semibold text-2xl m-2">Types</span>
-      <div class="flex justify-center m-4">
-        {
-          pokemon?.types.map((type) => (
-            <div
-              class:list={[
-                "py-1 px-5 rounded mx-3",
-                {
-                  "bg-[#A8A878]": type.type.name === "normal",
-                },
-                {
-                  "bg-[#F08030]": type.type.name === "fire",
-                },
-                {
-                  "bg-[#6890F0]": type.type.name === "water",
-                },
-                {
-                  "bg-[#F8D030]": type.type.name === "electric",
-                },
-                {
-                  "bg-[#78C850]": type.type.name === "grass",
-                },
-                {
-                  "bg-[#98D8D8]": type.type.name === "ice",
-                },
-                {
-                  "bg-[#C03028] text-white": type.type.name === "fighting",
-                },
-                {
-                  "bg-[#A040A0] text-white": type.type.name === "poison",
-                },
-                {
-                  "bg-[#E0C068]": type.type.name === "ground",
-                },
-                {
-                  "bg-[#A890F0]": type.type.name === "flying",
-                },
-                {
-                  "bg-[#F85888]": type.type.name === "psychic",
-                },
-                {
-                  "bg-[#A8B820]": type.type.name === "bug",
-                },
-                {
-                  "bg-[#B8A038]": type.type.name === "rock",
-                },
-                {
-                  "bg-[#705898] text-white": type.type.name === "ghost",
-                },
-                {
-                  "bg-[#7038F8] text-white": type.type.name === "dragon",
-                },
-                {
-                  "bg-[#705848]": type.type.name === "dark",
-                },
-                {
-                  "bg-[#B8B8D0]": type.type.name === "steel",
-                },
-                {
-                  "bg-[#EE99AC]": type.type.name === "fairy",
-                },
-              ]}
+  </div>
+
+  <div
+    class="rounded-3xl shadow-sm p-8 mb-8"
+    style={`background: linear-gradient(135deg, ${typeColorA}22, ${typeColorB}22);`}
+  >
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+      <div class="flex flex-col items-center">
+        <span class="font-mono text-gray-400">#{numberdex}</span>
+        <img
+          id="pokemon-sprite"
+          class="w-64 h-64 object-contain drop-shadow-xl transition-opacity"
+          src={artwork?.front_default ?? undefined}
+          data-default={artwork?.front_default ?? ""}
+          data-shiny={artwork?.front_shiny ?? ""}
+        />
+        <div class="flex gap-3 mt-2">
+          {artwork?.front_shiny && (
+            <button
+              id="shiny-toggle"
+              type="button"
+              class="text-sm py-1.5 px-4 rounded-full bg-white/70 border border-gray-200 hover:border-yellow-400 hover:text-yellow-600 transition font-medium"
             >
-              {CapitalizeWord(type.type.name)}
+              ✨ Shiny
+            </button>
+          )}
+          {cryUrl && (
+            <button
+              id="cry-play"
+              type="button"
+              class="text-sm py-1.5 px-4 rounded-full bg-white/70 border border-gray-200 hover:border-red-300 hover:text-red-600 transition font-medium"
+            >
+              🔊 Sonido
+            </button>
+          )}
+        </div>
+        {cryUrl && <audio id="cry-audio" src={cryUrl}></audio>}
+      </div>
+      <div class="text-center md:text-left">
+        <h1 class="text-4xl font-bold text-gray-900">
+          {CapitalizeWord(pokemon.name)}
+        </h1>
+        <div class="flex gap-2 justify-center md:justify-start mt-3">
+          {pokemon.types.map((type) => (
+            <TypeBadge type={type.type.name} />
+          ))}
+        </div>
+        <div class="grid grid-cols-2 gap-4 mt-6 max-w-xs mx-auto md:mx-0">
+          <div>
+            <div class="text-xs uppercase text-gray-500">Altura</div>
+            <div class="font-semibold text-lg">{heightMeters} m</div>
+          </div>
+          <div>
+            <div class="text-xs uppercase text-gray-500">Peso</div>
+            <div class="font-semibold text-lg">{weightKg} kg</div>
+          </div>
+          <div>
+            <div class="text-xs uppercase text-gray-500">Habilidad</div>
+            <div class="font-semibold">
+              {abilities.map((a) => CapitalizeWord(a.ability.name)).join(", ")}
             </div>
-          ))
-        }
+          </div>
+          <div>
+            <div class="text-xs uppercase text-gray-500">Habilidad oculta</div>
+            <div class="font-semibold">
+              {hidden.length > 0
+                ? CapitalizeWord(hidden[0].ability.name)
+                : "—"}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-  <div>
-    <ChainEvolution pokemon={pokemon} specie={specie} />
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="rounded-2xl bg-white shadow-sm p-6">
+      <h2 class="font-semibold text-xl text-gray-900 mb-4">Estadísticas</h2>
+      {pokemon.stats.map((stat) => {
+        const meta = STAT_META[stat.stat.name] ?? {
+          label: CapitalizeWord(stat.stat.name),
+          color: "#6b7280",
+        };
+        const pct = Math.min(100, (stat.base_stat / 180) * 100);
+        return (
+          <div class="mb-3 last:mb-0">
+            <div class="flex justify-between mb-1 text-sm">
+              <span class="font-medium text-gray-600">{meta.label}</span>
+              <span class="font-semibold text-gray-900">{stat.base_stat}</span>
+            </div>
+            <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+              <div
+                class="h-2.5 rounded-full transition-all duration-700 ease-out"
+                style={`width: ${pct}%; background: linear-gradient(90deg, ${meta.color}99, ${meta.color});`}
+              />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+
+    <div class="rounded-2xl bg-white shadow-sm p-6">
+      <h2 class="font-semibold text-xl text-gray-900 mb-4">Descripción</h2>
+      <p class="text-gray-600 italic">"{description}"</p>
+    </div>
   </div>
-  <div>
-    <MovementList moves={moves} />
-  </div>
+
+  <ChainEvolution pokemon={pokemon} specie={specie} />
+
+  <MovementList moves={moves} />
 </Layout>
+
+<script>
+  const spriteImg = document.getElementById("pokemon-sprite") as HTMLImageElement | null;
+  const shinyBtn = document.getElementById("shiny-toggle");
+  let showingShiny = false;
+
+  shinyBtn?.addEventListener("click", () => {
+    if (!spriteImg) return;
+    showingShiny = !showingShiny;
+    const nextSrc = showingShiny ? spriteImg.dataset.shiny : spriteImg.dataset.default;
+    if (nextSrc) spriteImg.src = nextSrc;
+  });
+
+  const cryAudio = document.getElementById("cry-audio") as HTMLAudioElement | null;
+  document.getElementById("cry-play")?.addEventListener("click", () => {
+    cryAudio?.play();
+  });
+</script>

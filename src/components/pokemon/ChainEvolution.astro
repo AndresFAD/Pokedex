@@ -1,6 +1,8 @@
 ---
 import { CapitalizeWord } from "../../lib/utils";
 import { getChain, getPokemonbyName } from "../../services/PokemonSerice";
+import { getTypeColor } from "../../lib/pokemonTypeColors";
+import TypeBadge from "../shared/TypeBadge.astro";
 import type { Pokemon } from "../../types/Pokemon";
 import type { Specie } from "../../types/Specie";
 import type { ChainElement } from "../../types/Chain";
@@ -22,96 +24,54 @@ const chainNames = collectChainNames(chain.chain);
 const evolutionChain = await Promise.all(
   chainNames.map((name) => getPokemonbyName(name))
 );
+const hasNoEvolutions = evolutionChain.length < 2;
 ---
 
-<div class="text-center m-4 p-10">
-  <h2 class="font-semibold text-2xl">Evolution Chain</h2>
-  <div class="flex justify-center m-4 ">
-    {
-      evolutionChain.map((pokemonChain) => (
-        <a href=`/pokemon/${pokemonChain.name}`>
-          {
-            <img
-              class="w-64 border-4 rounded-full mx-5 border-indigo-500 transition-transform hover:scale-110 shadow-lg"
-              class:list={[
-                "w-64 border-4 rounded-full mx-5",
-                {
-                  "border-indigo-500": pokemonChain.name !== pokemon.name,
-                  "border-rose-600": pokemonChain.name === pokemon.name,
-                },
-              ]}
-              src={pokemonChain.sprites.other?.["official-artwork"].front_default}
-            />
+<div class="rounded-2xl bg-white shadow-sm p-6 mt-8">
+  <h2 class="font-semibold text-xl text-gray-900 mb-4">Cadena evolutiva</h2>
+  {
+    hasNoEvolutions ? (
+      <p class="text-gray-500 text-sm">Este Pokémon no evoluciona.</p>
+    ) : (
+      <div class="flex flex-wrap items-center justify-center gap-4">
+        {evolutionChain.map((pokemonChain, index) => {
+          const isCurrent = pokemonChain.name === pokemon.name;
+          const colorA = getTypeColor(pokemonChain.types[0]?.type.name);
+          const colorB = getTypeColor(
+            pokemonChain.types[1]?.type.name ?? pokemonChain.types[0]?.type.name
+          );
 
-            <div class="flex justify-center my-4 ">
-            {pokemonChain.types.map(type => (
-               <div
-              class:list={[
-                "py-1 px-5 rounded mx-3 shadow-lg",
-                {
-                  "bg-[#A8A878]": type.type.name === "normal",
-                },
-                {
-                  "bg-[#F08030]": type.type.name === "fire",
-                },
-                {
-                  "bg-[#6890F0]": type.type.name === "water",
-                },
-                {
-                  "bg-[#F8D030]": type.type.name === "electric",
-                },
-                {
-                  "bg-[#78C850]": type.type.name === "grass",
-                },
-                {
-                  "bg-[#98D8D8]": type.type.name === "ice",
-                },
-                {
-                  "bg-[#C03028] text-white": type.type.name === "fighting",
-                },
-                {
-                  "bg-[#A040A0] text-white": type.type.name === "poison",
-                },
-                {
-                  "bg-[#E0C068]": type.type.name === "ground",
-                },
-                {
-                  "bg-[#A890F0]": type.type.name === "flying",
-                },
-                {
-                  "bg-[#F85888]": type.type.name === "psychic",
-                },
-                {
-                  "bg-[#A8B820]": type.type.name === "bug",
-                },
-                {
-                  "bg-[#B8A038]": type.type.name === "rock",
-                },
-                {
-                  "bg-[#705898] text-white": type.type.name === "ghost",
-                },
-                {
-                  "bg-[#7038F8] text-white": type.type.name === "dragon",
-                },
-                {
-                  "bg-[#705848]": type.type.name === "dark",
-                },
-                {
-                  "bg-[#B8B8D0]": type.type.name === "steel",
-                },
-                {
-                  "bg-[#EE99AC]": type.type.name === "fairy",
-                },
-              ]}
-            >
-              {CapitalizeWord(type.type.name)}
-            </div>
-            ))}</div>
-
-            <span class="font-medium text-lg">{CapitalizeWord(pokemonChain.name)} N.º{pokemonChain.id}</span>
-          }
-        </a>
-      ))
-    }
-  </div>
+          return (
+            <Fragment>
+              {index > 0 && <span class="text-2xl text-gray-300">→</span>}
+              <a
+                href={`/pokemon/${pokemonChain.name}`}
+                class:list={[
+                  "type-hover-card flex flex-col items-center rounded-2xl p-4 transition-shadow",
+                  isCurrent ? "ring-2 ring-red-400 bg-red-50" : "bg-gray-50",
+                ]}
+                style={`--type-color-a: ${colorA}; --type-color-b: ${colorB};`}
+              >
+                <img
+                  class="w-24 h-24 object-contain"
+                  src={
+                    pokemonChain.sprites.other?.["official-artwork"]
+                      .front_default ?? undefined
+                  }
+                />
+                <span class="font-semibold text-gray-900 mt-1">
+                  {CapitalizeWord(pokemonChain.name)}
+                </span>
+                <div class="flex gap-1 mt-1">
+                  {pokemonChain.types.map((type) => (
+                    <TypeBadge type={type.type.name} />
+                  ))}
+                </div>
+              </a>
+            </Fragment>
+          );
+        })}
+      </div>
+    )
+  }
 </div>

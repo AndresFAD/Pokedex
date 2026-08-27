@@ -1,61 +1,15 @@
 import type { Move } from "../../types/Move";
-import { RowMove } from "../move/RowMove";
+import { MoveCard } from "../move/MoveCard";
 
 export const MovementList = ({ moves }: { moves: Move[] }) => {
   return (
-    <>
-      <div className="flex justify-center font-semibold text-2xl">
-        Movement List
+    <div className="rounded-2xl bg-white shadow-sm p-6 mt-8">
+      <h2 className="font-semibold text-xl text-gray-900 mb-4">Movimientos</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {moves.map((move) => (
+          <MoveCard key={move.name} move={move} />
+        ))}
       </div>
-      <div className="flex flex-col m-10 border-2 border-gray-800 rounded-lg">
-        <div className="-m-1.5 overflow-x-auto">
-          <div className="p-1.5 min-w-full inline-block align-middle">
-            <div className="overflow-hidden">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
-                <thead>
-                  <tr>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-500"
-                    >
-                      Name
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-500"
-                    >
-                      Type
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-500"
-                    >
-                      Power
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-500"
-                    >
-                      Accuracy
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-end text-xs font-medium text-gray-500 uppercase dark:text-neutral-500"
-                    >
-                      Status
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 dark:divide-neutral-700">
-                  {moves.map((move) => (
-                    <RowMove key={move.name} move={move} />
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    </>
+    </div>
   );
 };

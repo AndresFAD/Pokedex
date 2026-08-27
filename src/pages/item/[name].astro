@@ -4,44 +4,52 @@ import { CapitalizeWord } from "../../lib/utils";
 import { getItembyName } from "../../services/PokemonSerice";
 
 const { name } = Astro.params;
+if (!name) return Astro.redirect("/items");
 
 const item = await getItembyName(name);
+
+const description = item.effect_entries.filter(
+  (entry) => entry.language.name === "en"
+)[0]?.effect;
+
+const priceEntry = item.prices.find((price) => price.purchase_price != null);
 ---
 
-<Layout title={name}>
-  <div class="flex justify-center m-5">
-    <h2 class="font-semibold text-3xl">{CapitalizeWord(name)}</h2>
+<Layout title={CapitalizeWord(name)}>
+  <div class="mb-6">
+    <a
+      href="/items"
+      class="py-2.5 px-5 rounded-full bg-white border border-gray-200 shadow-sm font-medium text-gray-700 hover:border-red-300 hover:text-red-600 hover:shadow-md transition"
+    >
+      ← Volver
+    </a>
   </div>
-  <div class="flex justify-center m-5">
-    <img class="w-40" src={item.sprites.default}/>
+
+  <div class="rounded-3xl bg-white shadow-sm p-8 mb-8 text-center">
+    <img class="w-24 h-24 mx-auto" src={item.sprites.default} />
+    <h1 class="text-4xl font-bold text-gray-900 mt-4">{CapitalizeWord(name)}</h1>
+    <span class="inline-block mt-2 text-xs uppercase font-bold tracking-wide text-blue-700 bg-blue-100 px-3 py-1 rounded-full">
+      {item.category.name.replace(/-/g, " ")}
+    </span>
+    <p class="text-gray-600 italic mt-4 max-w-xl mx-auto">
+      {description ?? "Sin descripción disponible."}
+    </p>
   </div>
-  <div class="bg-zinc-200 m-5 p-6 rounded-lg shadow-lg grid col-span-3">
-    <div class="flex flex-col pb-3 text-center col-span-3">
-      <dt class="mb-1 md:text-lg font-semibold">Descripction</dt>
-      <dd class="text-lg">
-        {
-          item.effect_entries.filter((ab) => ab.language.name === "en")[0]
-            .effect
-        }
-      </dd>
+
+  <div class="rounded-2xl bg-white shadow-sm p-6 grid grid-cols-2 gap-4 max-w-md mx-auto text-center">
+    <div>
+      <div class="text-xs uppercase text-gray-500">Precio</div>
+      <div class="font-semibold text-lg">
+        {priceEntry ? `₽ ${priceEntry.purchase_price}` : "No disponible"}
+      </div>
     </div>
-    <div class="flex flex-col pb-3 text-center">
-      <dt class="mb-1 md:text-lg font-semibold">Cost</dt>
-      <dd class="text-lg">
-        {item.cost}
-      </dd>
-    </div>
-    <div class="flex flex-col pb-3 text-center">
-      <dt class="mb-1 md:text-lg font-semibold">Category</dt>
-      <dd class="text-lg">
-        {CapitalizeWord(item.category.name)}
-      </dd>
-    </div>
-    <div class="flex flex-col pb-3 text-center">
-      <dt class="mb-1 md:text-lg font-semibold">Atributtes</dt>
-      <dd class="text-lg">
-        {item.attributes.map((att) => <p>{CapitalizeWord(att.name)}</p>)}
-      </dd>
+    <div>
+      <div class="text-xs uppercase text-gray-500">Atributos</div>
+      <div class="font-semibold">
+        {item.attributes.length > 0
+          ? item.attributes.map((att) => CapitalizeWord(att.name)).join(", ")
+          : "—"}
+      </div>
     </div>
   </div>
 </Layout>
