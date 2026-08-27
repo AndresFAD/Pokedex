@@ -1,7 +1,65 @@
 ---
 import Layout from "../layouts/Layout.astro";
+
+const sections = [
+  {
+    href: "/pokedex",
+    title: "Pokédex",
+    description: "Explora todos los Pokémon, sus estadísticas, tipos y cadenas evolutivas.",
+    color: "bg-red-50 border-red-200 hover:border-red-400",
+  },
+  {
+    href: "/moves",
+    title: "Movimientos",
+    description: "Consulta poder, precisión y tipo de cada movimiento.",
+    color: "bg-blue-50 border-blue-200 hover:border-blue-400",
+  },
+  {
+    href: "/abilities",
+    title: "Habilidades",
+    description: "Descubre qué hace cada habilidad y qué Pokémon la tienen.",
+    color: "bg-green-50 border-green-200 hover:border-green-400",
+  },
+  {
+    href: "/items",
+    title: "Objetos",
+    description: "Explora objetos, su costo y su categoría.",
+    color: "bg-yellow-50 border-yellow-200 hover:border-yellow-400",
+  },
+];
 ---
 
-<Layout title="Welcome to Astro.">
-  <h1>Pokedex pichudisima</h1>
+<Layout title="Pokédex">
+  <div class="text-center py-12">
+    <h1 class="text-5xl font-bold text-gray-900">
+      Bienvenido a la <span class="text-red-600">Pokédex</span>
+    </h1>
+    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+      Toda la información de Pokémon, movimientos, habilidades y objetos en un
+      solo lugar.
+    </p>
+    <a
+      href="/pokedex"
+      class="inline-block mt-8 py-3 px-8 bg-red-600 text-white font-semibold rounded-lg shadow hover:bg-red-700 transition-colors"
+    >
+      Explorar la Pokédex
+    </a>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pb-12">
+    {
+      sections.map((section) => (
+        <a
+          href={section.href}
+          class:list={[
+            "block p-6 rounded-xl border-2 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5",
+            section.color,
+          ]}
+        >
+          <h2 class="text-2xl font-semibold text-gray-900">{section.title}</h2>
+          <p class="mt-2 text-gray-600">{section.description}</p>
+        </a>
+      ))
+    }
+  </div>
 </Layout>

@@ -9,6 +9,9 @@ const initialPokedex = await getPokemons(
 const initialPokemons = await Promise.all(
   initialPokedex.results.map((pokemon) => getPokemonbyName(pokemon.name))
 );
+const allPokemon = await getPokemons(
+  "https://pokeapi.co/api/v2/pokemon?limit=100000&offset=0"
+);
 ---
 
 <Layout title="Pokedex">
@@ -16,5 +19,6 @@ const initialPokemons = await Promise.all(
     client:load
     initialPokedex={initialPokedex}
     initialPokemons={initialPokemons}
+    allPokemonNames={allPokemon.results}
   />
 </Layout>
