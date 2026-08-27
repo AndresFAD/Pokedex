@@ -1,34 +1,27 @@
 ---
 import { CapitalizeWord } from "../../lib/utils";
-import {
-  getChain,
-  getPokemonbyName,
-  getSpecie,
-} from "../../services/PokemonSerice";
+import { getChain, getPokemonbyName } from "../../services/PokemonSerice";
 import type { Pokemon } from "../../types/Pokemon";
+import type { Specie } from "../../types/Specie";
+import type { ChainElement } from "../../types/Chain";
 
 interface Props {
   pokemon: Pokemon;
+  specie: Specie;
 }
 
-const { pokemon } = Astro.props;
+const { pokemon, specie } = Astro.props;
 
-let evolutionChain: Pokemon[] = [];
-const specie = await getSpecie(pokemon.species.url);
+const collectChainNames = (link: ChainElement): string[] => [
+  link.species.name,
+  ...link.evolves_to.flatMap(collectChainNames),
+];
+
 const chain = await getChain(specie.evolution_chain.url);
-let actualChain = chain.chain;
-
-let actualPokemon: Pokemon | null = null;
-
-while (actualChain) {
-  actualChain.evolves_to.length > 1 ? actualChain.evolves_to.map(async (obj) => evolutionChain.push(await getPokemonbyName(obj.species.name))): true;
-  actualPokemon = await getPokemonbyName(actualChain.species.name);
-  console.log(actualChain.evolves_to)
-  console.log(evolutionChain.includes(actualPokemon))
-  evolutionChain.includes(actualPokemon) === false ? evolutionChain.push(actualPokemon): true;
-
-  actualChain = actualChain.evolves_to[0];
-}
+const chainNames = collectChainNames(chain.chain);
+const evolutionChain = await Promise.all(
+  chainNames.map((name) => getPokemonbyName(name))
+);
 ---
 
 <div class="text-center m-4 p-10">

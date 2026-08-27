@@ -23,35 +23,35 @@ export const getMoves = async () => {
 }; 
 
 export const getPokemonbyName = async (name: string) => {
-    const res = await fetch(`${url}/pokemon/${name}`);
+    const res = await fetch(`${url}pokemon/${name}`);
 
     const pokemon: Pokemon = await res.json()
     return pokemon
 }
 
 export const getPokemonbyId = async (id: number) => {
-  const res = await fetch(`${url}/pokemon/${id}`);
+  const res = await fetch(`${url}pokemon/${id}`);
 
   const pokemon: Pokemon = await res.json();
   return pokemon;
 };
 
 export const getMovebyName = async (name: string) => {
-  const res = await fetch(`${url}/move/${name}`);
+  const res = await fetch(`${url}move/${name}`);
 
   const move: Move = await res.json();
   return move;
 };
 
 export const getAbilitybyName = async (name: string) => {
-  const res = await fetch(`${url}/ability/${name}`);
+  const res = await fetch(`${url}ability/${name}`);
 
   const ability: Ability = await res.json();
   return ability;
 };
 
 export const getItembyName = async (name: string) => {
-  const res = await fetch(`${url}/item/${name}`);
+  const res = await fetch(`${url}item/${name}`);
 
   const item: Item = await res.json();
   return item;

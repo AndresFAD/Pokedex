@@ -1,9 +1,21 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import {ListItems} from "../components/items/ListItems"
+import { ListItems } from "../components/items/ListItems";
+import { getPokemons, getItembyName } from "../services/PokemonSerice";
+
+const initialItemList = await getPokemons(
+  "https://pokeapi.co/api/v2/item?offset=0&limit=20"
+);
+const initialItems = await Promise.all(
+  initialItemList.results.map((item) => getItembyName(item.name))
+);
 ---
 
-<Layout title="Movement List">
-  <div class="flex justify-center font-semibold text-2xl">Movement List</div>
-  <ListItems client:load />
+<Layout title="Items List">
+  <div class="flex justify-center font-semibold text-2xl">Items List</div>
+  <ListItems
+    client:load
+    initialItemList={initialItemList}
+    initialItems={initialItems}
+  />
 </Layout>

@@ -1,35 +1,34 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { Pokedex } from "../../types/Pokedex";
+import type { Ability } from "../../types/Ability";
+import { getAbilitybyName } from "../../services/PokemonSerice";
 import { RowAbility } from "./RowAbility";
 
-export const ListAbilities = () => {
-  const [url, setUrl] = useState(
-    "https://pokeapi.co/api/v2/ability?offset=0&limit=20"
-  );
-  const [abilities, setAbilities] = useState<Pokedex>();
+interface Props {
+  initialAbilityList: Pokedex;
+  initialAbilities: Ability[];
+}
 
-  useEffect(() => {
-    const getAbilities = async () => {
-      let res = await fetch(url);
-      let data = await res.json();
+export const ListAbilities = ({ initialAbilityList, initialAbilities }: Props) => {
+  const [abilityList, setAbilityList] = useState<Pokedex>(initialAbilityList);
+  const [abilities, setAbilities] = useState<Ability[]>(initialAbilities);
+  const [loading, setLoading] = useState(false);
 
-      setAbilities(data);
-    };
-    getAbilities();
-  }, []);
+  const loadPage = async (pageUrl?: string) => {
+    if (!pageUrl) return;
+    setLoading(true);
+    try {
+      const res = await fetch(pageUrl);
+      const data: Pokedex = await res.json();
+      const details = await Promise.all(
+        data.results.map((ability) => getAbilitybyName(ability.name))
+      );
 
-  const previous = async () => {
-    let res = await fetch(abilities?.previous);
-    let data = await res.json();
-
-    setAbilities(data);
-  };
-
-  const next = async () => {
-    let res = await fetch(abilities?.next);
-    let data = await res.json();
-
-    setAbilities(data);
+      setAbilityList(data);
+      setAbilities(details);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -56,8 +55,8 @@ export const ListAbilities = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-neutral-700">
-                  {abilities?.results.map((move) => (
-                    <RowAbility key={move?.name} name={move?.name} />
+                  {abilities.map((ability) => (
+                    <RowAbility key={ability.name} ability={ability} />
                   ))}
                 </tbody>
               </table>
@@ -66,18 +65,20 @@ export const ListAbilities = () => {
         </div>
       </div>
       <div className="flex justify-center gap-6 m-10">
-        {abilities?.previous && (
+        {abilityList?.previous && (
           <button
-            onClick={() => previous()}
-            className="py-3 px-4 rounded-lg bg-gray-400 font-medium"
+            disabled={loading}
+            onClick={() => loadPage(abilityList.previous)}
+            className="py-3 px-4 rounded-lg bg-gray-400 font-medium disabled:opacity-50"
           >
             Previous page
           </button>
         )}
-        {abilities?.next && (
+        {abilityList?.next && (
           <button
-            onClick={() => next()}
-            className="py-3 px-4 rounded-lg bg-gray-400 font-medium"
+            disabled={loading}
+            onClick={() => loadPage(abilityList.next)}
+            className="py-3 px-4 rounded-lg bg-gray-400 font-medium disabled:opacity-50"
           >
             Next Page
           </button>

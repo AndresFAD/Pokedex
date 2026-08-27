@@ -1,10 +1,19 @@
 ---
 import { ListMoves } from "../components/move/ListMoves";
 import Layout from "../layouts/Layout.astro";
+import { getMoves, getMovebyName } from "../services/PokemonSerice";
 
+const initialMoveList = await getMoves();
+const initialMoves = await Promise.all(
+  initialMoveList.results.map((move) => getMovebyName(move.name))
+);
 ---
 
 <Layout title="Movement List">
   <div class="flex justify-center font-semibold text-2xl">Movement List</div>
-  <ListMoves client:load />
+  <ListMoves
+    client:load
+    initialMoveList={initialMoveList}
+    initialMoves={initialMoves}
+  />
 </Layout>

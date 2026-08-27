@@ -1,58 +1,58 @@
-import { useEffect, useState } from "react";
-import { getPokemons } from "../../services/PokemonSerice";
+import { useState } from "react";
+import { getPokemonbyName } from "../../services/PokemonSerice";
 import { CardPokemon } from "./CardPokemon";
 import type { Pokedex } from "../../types/Pokedex";
+import type { Pokemon } from "../../types/Pokemon";
 
-export const ListPokedex = () => {
-  const [url, setUrl] = useState(
-    "https://pokeapi.co/api/v2/pokemon?offset=0&limit=20"
-  );
-  const [pokedex, setPokedex] = useState<Pokedex>();
+interface Props {
+  initialPokedex: Pokedex;
+  initialPokemons: Pokemon[];
+}
 
-  useEffect(() => {
-    const getPokedex = async () => {
-      let res = await fetch(url);
-      let data = await res.json();
+export const ListPokedex = ({ initialPokedex, initialPokemons }: Props) => {
+  const [pokedex, setPokedex] = useState<Pokedex>(initialPokedex);
+  const [pokemons, setPokemons] = useState<Pokemon[]>(initialPokemons);
+  const [loading, setLoading] = useState(false);
+
+  const loadPage = async (pageUrl?: string) => {
+    if (!pageUrl) return;
+    setLoading(true);
+    try {
+      const res = await fetch(pageUrl);
+      const data: Pokedex = await res.json();
+      const details = await Promise.all(
+        data.results.map((pokemon) => getPokemonbyName(pokemon.name))
+      );
 
       setPokedex(data);
-    };
-    getPokedex();
-  }, []);
-
-  const previous = async () => {
-    let res = await fetch(pokedex?.previous);
-    let data = await res.json();
-
-    setPokedex(data);
-  };
-
-  const next = async () => {
-    let res = await fetch(pokedex?.next);
-    let data = await res.json();
-
-    setPokedex(data);
+      setPokemons(details);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="m-4">
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {pokedex?.results.map((pokemon) => (
-          <CardPokemon key={pokemon?.name} name={pokemon?.name} />
+        {pokemons.map((pokemon) => (
+          <CardPokemon key={pokemon.name} pokemon={pokemon} />
         ))}
       </div>
       <div className="flex justify-center gap-6 m-10">
         {pokedex?.previous && (
           <button
-            onClick={() => previous()}
-            className="py-3 px-4 rounded-lg bg-gray-400 font-medium"
+            disabled={loading}
+            onClick={() => loadPage(pokedex.previous)}
+            className="py-3 px-4 rounded-lg bg-gray-400 font-medium disabled:opacity-50"
           >
             Previous page
           </button>
         )}
         {pokedex?.next && (
           <button
-            onClick={() => next()}
-            className="py-3 px-4 rounded-lg bg-gray-400 font-medium"
+            disabled={loading}
+            onClick={() => loadPage(pokedex.next)}
+            className="py-3 px-4 rounded-lg bg-gray-400 font-medium disabled:opacity-50"
           >
             Next Page
           </button>
