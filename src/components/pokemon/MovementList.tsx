@@ -1,13 +1,7 @@
-import type { Pokemon } from "../../types/Pokemon";
 import type { Move } from "../../types/Move";
-import { getMove } from "../../services/PokemonSerice";
-import { CapitalizeWord } from "../../lib/utils";
 import { RowMove } from "../move/RowMove";
 
-export const MovementList = ({ pokemon }: { pokemon: Pokemon }) => {
-
-  console.log(pokemon.moves)
-
+export const MovementList = ({ moves }: { moves: Move[] }) => {
   return (
     <>
       <div className="flex justify-center font-semibold text-2xl">
@@ -53,8 +47,8 @@ export const MovementList = ({ pokemon }: { pokemon: Pokemon }) => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-neutral-700">
-                  {pokemon.moves.map((move) => (
-                      <RowMove key={move.move.name} name={move.move.name} />
+                  {moves.map((move) => (
+                    <RowMove key={move.name} move={move} />
                   ))}
                 </tbody>
               </table>

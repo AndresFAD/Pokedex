@@ -1,9 +1,21 @@
 ---
 import { ListAbilities } from "../components/ability/ListAbilities";
 import Layout from "../layouts/Layout.astro";
+import { getPokemons, getAbilitybyName } from "../services/PokemonSerice";
+
+const initialAbilityList = await getPokemons(
+  "https://pokeapi.co/api/v2/ability?offset=0&limit=20"
+);
+const initialAbilities = await Promise.all(
+  initialAbilityList.results.map((ability) => getAbilitybyName(ability.name))
+);
 ---
 
-<Layout title="Movement List">
+<Layout title="Abilities List">
   <div class="flex justify-center font-semibold text-2xl">Abilities List</div>
-  <ListAbilities client:load />
+  <ListAbilities
+    client:load
+    initialAbilityList={initialAbilityList}
+    initialAbilities={initialAbilities}
+  />
 </Layout>

@@ -2,11 +2,14 @@
 import { CardPokemon } from "../../components/pokedex/CardPokemon";
 import Layout from "../../layouts/Layout.astro";
 import { CapitalizeWord } from "../../lib/utils";
-import { getMovebyName } from "../../services/PokemonSerice";
+import { getMovebyName, getPokemonbyName } from "../../services/PokemonSerice";
 
 const { name } = Astro.params;
 
 const move = await getMovebyName(name);
+const pokemons = await Promise.all(
+  move.learned_by_pokemon.map((entry) => getPokemonbyName(entry.name))
+);
 ---
 
 <Layout title={CapitalizeWord(move.name)}>
@@ -128,8 +131,8 @@ const move = await getMovebyName(name);
   </div>
   <div class="grid grid-cols-4 bg-zinc-200 m-5 p-6 rounded-lg shadow-lg">
     {
-      move.learned_by_pokemon.map((pokemon) => (
-        <CardPokemon name={pokemon?.name} client:load />
+      pokemons.map((pokemon) => (
+        <CardPokemon pokemon={pokemon} />
       ))
     }
   </div>

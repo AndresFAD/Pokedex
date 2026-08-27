@@ -1,57 +1,58 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { CardItem } from "./CardItem";
+import { getItembyName } from "../../services/PokemonSerice";
 import type { Pokedex } from "../../types/Pokedex";
+import type { Item } from "../../types/Item";
 
-export const ListItems = () => {
-  const [url, setUrl] = useState(
-    "https://pokeapi.co/api/v2/item?offset=0&limit=20"
-  );
-  const [items, setItems] = useState<Pokedex>();
+interface Props {
+  initialItemList: Pokedex;
+  initialItems: Item[];
+}
 
-  useEffect(() => {
-    const getItems = async () => {
-      let res = await fetch(url);
-      let data = await res.json();
+export const ListItems = ({ initialItemList, initialItems }: Props) => {
+  const [itemList, setItemList] = useState<Pokedex>(initialItemList);
+  const [items, setItems] = useState<Item[]>(initialItems);
+  const [loading, setLoading] = useState(false);
 
-      setItems(data);
-    };
-    getItems();
-  }, []);
+  const loadPage = async (pageUrl?: string) => {
+    if (!pageUrl) return;
+    setLoading(true);
+    try {
+      const res = await fetch(pageUrl);
+      const data: Pokedex = await res.json();
+      const details = await Promise.all(
+        data.results.map((item) => getItembyName(item.name))
+      );
 
-  const previous = async () => {
-    let res = await fetch(items?.previous);
-    let data = await res.json();
-
-    setItems(data);
-  };
-
-  const next = async () => {
-    let res = await fetch(items?.next);
-    let data = await res.json();
-
-    setItems(data);
+      setItemList(data);
+      setItems(details);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="m-4">
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {items?.results.map((item) => (
-          <CardItem key={item?.name} name={item?.name} />
+        {items.map((item) => (
+          <CardItem key={item.name} item={item} />
         ))}
       </div>
       <div className="flex justify-center gap-6 m-10">
-        {items?.previous && (
+        {itemList?.previous && (
           <button
-            onClick={() => previous()}
-            className="py-3 px-4 rounded-lg bg-gray-400 font-medium"
+            disabled={loading}
+            onClick={() => loadPage(itemList.previous)}
+            className="py-3 px-4 rounded-lg bg-gray-400 font-medium disabled:opacity-50"
           >
             Previous page
           </button>
         )}
-        {items?.next && (
+        {itemList?.next && (
           <button
-            onClick={() => next()}
-            className="py-3 px-4 rounded-lg bg-gray-400 font-medium"
+            disabled={loading}
+            onClick={() => loadPage(itemList.next)}
+            className="py-3 px-4 rounded-lg bg-gray-400 font-medium disabled:opacity-50"
           >
             Next Page
           </button>

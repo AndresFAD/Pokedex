@@ -1,8 +1,20 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import { ListPokedex } from "../components/pokedex/ListPokedex";
+import { getPokemons, getPokemonbyName } from "../services/PokemonSerice";
+
+const initialPokedex = await getPokemons(
+  "https://pokeapi.co/api/v2/pokemon?offset=0&limit=20"
+);
+const initialPokemons = await Promise.all(
+  initialPokedex.results.map((pokemon) => getPokemonbyName(pokemon.name))
+);
 ---
 
 <Layout title="Pokedex">
-  <ListPokedex client:load />
+  <ListPokedex
+    client:load
+    initialPokedex={initialPokedex}
+    initialPokemons={initialPokemons}
+  />
 </Layout>
