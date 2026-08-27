@@ -15,13 +15,6 @@ export const getPokemons = async (url: string) => {
     return pokedex
 } 
 
-export const getMoves = async () => {
-  const res = await fetch(`${url}move`);
-
-  const pokedex: Pokedex = await res.json();
-  return pokedex;
-}; 
-
 export const getPokemonbyName = async (name: string) => {
     const res = await fetch(`${url}pokemon/${name}`);
 

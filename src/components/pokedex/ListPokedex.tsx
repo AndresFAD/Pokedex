@@ -1,25 +1,30 @@
 import { useEffect, useState } from "react";
 import { getPokemonbyName } from "../../services/PokemonSerice";
 import { CardPokemon } from "./CardPokemon";
+import { Pagination } from "../shared/Pagination";
 import type { Pokedex, Result } from "../../types/Pokedex";
 import type { Pokemon } from "../../types/Pokemon";
 
 interface Props {
+  baseUrl: string;
   initialPokedex: Pokedex;
   initialPokemons: Pokemon[];
   allPokemonNames: Result[];
 }
 
+const PAGE_SIZE = 20;
 const SEARCH_RESULTS_LIMIT = 24;
 const SEARCH_DEBOUNCE_MS = 300;
 
 export const ListPokedex = ({
+  baseUrl,
   initialPokedex,
   initialPokemons,
   allPokemonNames,
 }: Props) => {
   const [pokedex, setPokedex] = useState<Pokedex>(initialPokedex);
   const [pokemons, setPokemons] = useState<Pokemon[]>(initialPokemons);
+  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
 
   const [query, setQuery] = useState("");
@@ -62,11 +67,11 @@ export const ListPokedex = ({
     };
   }, [debouncedQuery, allPokemonNames]);
 
-  const loadPage = async (pageUrl?: string) => {
-    if (!pageUrl) return;
+  const goToPage = async (page: number) => {
     setLoading(true);
     try {
-      const res = await fetch(pageUrl);
+      const offset = (page - 1) * PAGE_SIZE;
+      const res = await fetch(`${baseUrl}?offset=${offset}&limit=${PAGE_SIZE}`);
       const data: Pokedex = await res.json();
       const details = await Promise.all(
         data.results.map((pokemon) => getPokemonbyName(pokemon.name))
@@ -74,6 +79,8 @@ export const ListPokedex = ({
 
       setPokedex(data);
       setPokemons(details);
+      setCurrentPage(page);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } finally {
       setLoading(false);
     }
@@ -81,9 +88,7 @@ export const ListPokedex = ({
 
   const isSearching = debouncedQuery.length > 0;
   const visiblePokemons = isSearching ? searchResults : pokemons;
-
-  const pageButtonClass =
-    "py-2.5 px-6 rounded-full bg-white border border-gray-200 shadow-sm font-medium text-gray-700 hover:border-red-300 hover:text-red-600 hover:shadow-md transition disabled:opacity-40 disabled:pointer-events-none";
+  const totalPages = Math.ceil(pokedex.count / PAGE_SIZE);
 
   return (
     <div>
@@ -128,26 +133,12 @@ export const ListPokedex = ({
       </div>
 
       {!isSearching && (
-        <div className="flex justify-center gap-4 my-10">
-          {pokedex?.previous && (
-            <button
-              disabled={loading}
-              onClick={() => loadPage(pokedex.previous)}
-              className={pageButtonClass}
-            >
-              ← Previous page
-            </button>
-          )}
-          {pokedex?.next && (
-            <button
-              disabled={loading}
-              onClick={() => loadPage(pokedex.next)}
-              className={pageButtonClass}
-            >
-              Next Page →
-            </button>
-          )}
-        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={goToPage}
+          disabled={loading}
+        />
       )}
     </div>
   );

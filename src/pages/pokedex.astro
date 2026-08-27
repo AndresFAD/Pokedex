@@ -23,6 +23,7 @@ const allPokemon = await getPokemons(
   </div>
   <ListPokedex
     client:load
+    baseUrl="https://pokeapi.co/api/v2/pokemon"
     initialPokedex={initialPokedex}
     initialPokemons={initialPokemons}
     allPokemonNames={allPokemon.results}

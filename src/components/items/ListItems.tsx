@@ -1,24 +1,29 @@
 import { useState } from "react";
 import { CardItem } from "./CardItem";
 import { getItembyName } from "../../services/PokemonSerice";
+import { Pagination } from "../shared/Pagination";
 import type { Pokedex } from "../../types/Pokedex";
 import type { Item } from "../../types/Item";
 
 interface Props {
+  baseUrl: string;
   initialItemList: Pokedex;
   initialItems: Item[];
 }
 
-export const ListItems = ({ initialItemList, initialItems }: Props) => {
+const PAGE_SIZE = 20;
+
+export const ListItems = ({ baseUrl, initialItemList, initialItems }: Props) => {
   const [itemList, setItemList] = useState<Pokedex>(initialItemList);
   const [items, setItems] = useState<Item[]>(initialItems);
+  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  const loadPage = async (pageUrl?: string) => {
-    if (!pageUrl) return;
+  const goToPage = async (page: number) => {
     setLoading(true);
     try {
-      const res = await fetch(pageUrl);
+      const offset = (page - 1) * PAGE_SIZE;
+      const res = await fetch(`${baseUrl}?offset=${offset}&limit=${PAGE_SIZE}`);
       const data: Pokedex = await res.json();
       const details = await Promise.all(
         data.results.map((item) => getItembyName(item.name))
@@ -26,13 +31,14 @@ export const ListItems = ({ initialItemList, initialItems }: Props) => {
 
       setItemList(data);
       setItems(details);
+      setCurrentPage(page);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } finally {
       setLoading(false);
     }
   };
 
-  const pageButtonClass =
-    "py-2.5 px-6 rounded-full bg-white border border-gray-200 shadow-sm font-medium text-gray-700 hover:border-red-300 hover:text-red-600 hover:shadow-md transition disabled:opacity-40 disabled:pointer-events-none";
+  const totalPages = Math.ceil(itemList.count / PAGE_SIZE);
 
   return (
     <div>
@@ -41,26 +47,12 @@ export const ListItems = ({ initialItemList, initialItems }: Props) => {
           <CardItem key={item.name} item={item} />
         ))}
       </div>
-      <div className="flex justify-center gap-4 my-10">
-        {itemList?.previous && (
-          <button
-            disabled={loading}
-            onClick={() => loadPage(itemList.previous)}
-            className={pageButtonClass}
-          >
-            ← Previous page
-          </button>
-        )}
-        {itemList?.next && (
-          <button
-            disabled={loading}
-            onClick={() => loadPage(itemList.next)}
-            className={pageButtonClass}
-          >
-            Next Page →
-          </button>
-        )}
-      </div>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={goToPage}
+        disabled={loading}
+      />
     </div>
   );
 };

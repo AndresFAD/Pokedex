@@ -3,22 +3,27 @@ import type { Pokedex } from "../../types/Pokedex";
 import type { Move } from "../../types/Move";
 import { getMovebyName } from "../../services/PokemonSerice";
 import { MoveCard } from "./MoveCard";
+import { Pagination } from "../shared/Pagination";
 
 interface Props {
+  baseUrl: string;
   initialMoveList: Pokedex;
   initialMoves: Move[];
 }
 
-export const ListMoves = ({ initialMoveList, initialMoves }: Props) => {
+const PAGE_SIZE = 20;
+
+export const ListMoves = ({ baseUrl, initialMoveList, initialMoves }: Props) => {
   const [moveList, setMoveList] = useState<Pokedex>(initialMoveList);
   const [moves, setMoves] = useState<Move[]>(initialMoves);
+  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  const loadPage = async (pageUrl?: string) => {
-    if (!pageUrl) return;
+  const goToPage = async (page: number) => {
     setLoading(true);
     try {
-      const res = await fetch(pageUrl);
+      const offset = (page - 1) * PAGE_SIZE;
+      const res = await fetch(`${baseUrl}?offset=${offset}&limit=${PAGE_SIZE}`);
       const data: Pokedex = await res.json();
       const details = await Promise.all(
         data.results.map((move) => getMovebyName(move.name))
@@ -26,13 +31,14 @@ export const ListMoves = ({ initialMoveList, initialMoves }: Props) => {
 
       setMoveList(data);
       setMoves(details);
+      setCurrentPage(page);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } finally {
       setLoading(false);
     }
   };
 
-  const pageButtonClass =
-    "py-2.5 px-6 rounded-full bg-white border border-gray-200 shadow-sm font-medium text-gray-700 hover:border-red-300 hover:text-red-600 hover:shadow-md transition disabled:opacity-40 disabled:pointer-events-none";
+  const totalPages = Math.ceil(moveList.count / PAGE_SIZE);
 
   return (
     <div>
@@ -41,26 +47,12 @@ export const ListMoves = ({ initialMoveList, initialMoves }: Props) => {
           <MoveCard key={move.name} move={move} />
         ))}
       </div>
-      <div className="flex justify-center gap-4 my-10">
-        {moveList?.previous && (
-          <button
-            disabled={loading}
-            onClick={() => loadPage(moveList.previous)}
-            className={pageButtonClass}
-          >
-            ← Previous page
-          </button>
-        )}
-        {moveList?.next && (
-          <button
-            disabled={loading}
-            onClick={() => loadPage(moveList.next)}
-            className={pageButtonClass}
-          >
-            Next Page →
-          </button>
-        )}
-      </div>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={goToPage}
+        disabled={loading}
+      />
     </div>
   );
 };
