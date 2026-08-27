@@ -82,16 +82,34 @@ export const ListPokedex = ({
   const isSearching = debouncedQuery.length > 0;
   const visiblePokemons = isSearching ? searchResults : pokemons;
 
+  const pageButtonClass =
+    "py-2.5 px-6 rounded-full bg-white border border-gray-200 shadow-sm font-medium text-gray-700 hover:border-red-300 hover:text-red-600 hover:shadow-md transition disabled:opacity-40 disabled:pointer-events-none";
+
   return (
-    <div className="m-4">
-      <div className="flex justify-center mb-6">
-        <input
-          type="search"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Buscar Pokémon por nombre..."
-          className="w-full max-w-md px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-        />
+    <div>
+      <div className="flex justify-center mb-8">
+        <div className="relative w-full max-w-md">
+          <svg
+            className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Buscar Pokémon por nombre..."
+            className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition"
+          />
+        </div>
       </div>
 
       {isSearching && searching && (
@@ -103,30 +121,30 @@ export const ListPokedex = ({
         </p>
       )}
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
         {visiblePokemons.map((pokemon) => (
           <CardPokemon key={pokemon.name} pokemon={pokemon} />
         ))}
       </div>
 
       {!isSearching && (
-        <div className="flex justify-center gap-6 m-10">
+        <div className="flex justify-center gap-4 my-10">
           {pokedex?.previous && (
             <button
               disabled={loading}
               onClick={() => loadPage(pokedex.previous)}
-              className="py-3 px-4 rounded-lg bg-gray-400 font-medium disabled:opacity-50"
+              className={pageButtonClass}
             >
-              Previous page
+              ← Previous page
             </button>
           )}
           {pokedex?.next && (
             <button
               disabled={loading}
               onClick={() => loadPage(pokedex.next)}
-              className="py-3 px-4 rounded-lg bg-gray-400 font-medium disabled:opacity-50"
+              className={pageButtonClass}
             >
-              Next Page
+              Next Page →
             </button>
           )}
         </div>

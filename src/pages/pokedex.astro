@@ -15,6 +15,12 @@ const allPokemon = await getPokemons(
 ---
 
 <Layout title="Pokedex">
+  <div class="text-center mb-8">
+    <h1 class="text-4xl font-bold text-gray-900">Pokédex</h1>
+    <p class="text-gray-600 mt-1">
+      {allPokemon.count} Pokémon esperando a ser descubiertos
+    </p>
+  </div>
   <ListPokedex
     client:load
     initialPokedex={initialPokedex}

@@ -10,7 +10,12 @@ const initialMoves = await Promise.all(
 ---
 
 <Layout title="Movement List">
-  <div class="flex justify-center font-semibold text-2xl">Movement List</div>
+  <div class="text-center mb-8">
+    <h1 class="text-4xl font-bold text-gray-900">Movimientos</h1>
+    <p class="text-gray-600 mt-1">
+      {initialMoveList.count} movimientos disponibles
+    </p>
+  </div>
   <ListMoves
     client:load
     initialMoveList={initialMoveList}

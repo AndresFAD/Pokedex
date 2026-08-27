@@ -12,7 +12,12 @@ const initialAbilities = await Promise.all(
 ---
 
 <Layout title="Abilities List">
-  <div class="flex justify-center font-semibold text-2xl">Abilities List</div>
+  <div class="text-center mb-8">
+    <h1 class="text-4xl font-bold text-gray-900">Habilidades</h1>
+    <p class="text-gray-600 mt-1">
+      {initialAbilityList.count} habilidades disponibles
+    </p>
+  </div>
   <ListAbilities
     client:load
     initialAbilityList={initialAbilityList}

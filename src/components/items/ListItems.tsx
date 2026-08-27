@@ -31,30 +31,33 @@ export const ListItems = ({ initialItemList, initialItems }: Props) => {
     }
   };
 
+  const pageButtonClass =
+    "py-2.5 px-6 rounded-full bg-white border border-gray-200 shadow-sm font-medium text-gray-700 hover:border-red-300 hover:text-red-600 hover:shadow-md transition disabled:opacity-40 disabled:pointer-events-none";
+
   return (
-    <div className="m-4">
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
         {items.map((item) => (
           <CardItem key={item.name} item={item} />
         ))}
       </div>
-      <div className="flex justify-center gap-6 m-10">
+      <div className="flex justify-center gap-4 my-10">
         {itemList?.previous && (
           <button
             disabled={loading}
             onClick={() => loadPage(itemList.previous)}
-            className="py-3 px-4 rounded-lg bg-gray-400 font-medium disabled:opacity-50"
+            className={pageButtonClass}
           >
-            Previous page
+            ← Previous page
           </button>
         )}
         {itemList?.next && (
           <button
             disabled={loading}
             onClick={() => loadPage(itemList.next)}
-            className="py-3 px-4 rounded-lg bg-gray-400 font-medium disabled:opacity-50"
+            className={pageButtonClass}
           >
-            Next Page
+            Next Page →
           </button>
         )}
       </div>

@@ -12,7 +12,10 @@ const initialItems = await Promise.all(
 ---
 
 <Layout title="Items List">
-  <div class="flex justify-center font-semibold text-2xl">Items List</div>
+  <div class="text-center mb-8">
+    <h1 class="text-4xl font-bold text-gray-900">Objetos</h1>
+    <p class="text-gray-600 mt-1">{initialItemList.count} objetos disponibles</p>
+  </div>
   <ListItems
     client:load
     initialItemList={initialItemList}
