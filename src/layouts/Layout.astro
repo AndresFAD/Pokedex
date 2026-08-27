@@ -47,22 +47,22 @@ const { title } = Astro.props;
       background-attachment: fixed;
     }
 
-    /* Renders a two-tone border on hover: the left/top edges take --type-color-a,
-       the right/bottom edges take --type-color-b. For single-type cards both
-       variables are the same color, so it reads as a plain solid border. */
+    /* Renders a diffused neon-style glow on hover: --type-color-a bleeds from
+       the left, --type-color-b from the right. For single-type cards both
+       variables are the same color, so the glow reads as one even halo. The
+       glow is a box-shadow (not border-image) so it follows border-radius
+       and stays soft/rounded instead of a hard-edged split line. */
     .type-hover-card {
       border: 3px solid transparent;
       border-radius: 1rem;
-      transition: border-color 0.25s ease, transform 0.2s ease, box-shadow 0.2s ease;
+      transition: transform 0.25s ease, box-shadow 0.3s ease;
     }
     .type-hover-card:hover {
-      border-image: linear-gradient(
-          90deg,
-          var(--type-color-a, #d1d5db) 50%,
-          var(--type-color-b, #d1d5db) 50%
-        )
-        1;
       transform: translateY(-4px);
+      box-shadow:
+        -10px 0 28px -8px var(--type-color-a, #d1d5db),
+        10px 0 28px -8px var(--type-color-b, #d1d5db),
+        0 6px 20px -6px rgba(0, 0, 0, 0.25);
     }
   </style>
 </html>
